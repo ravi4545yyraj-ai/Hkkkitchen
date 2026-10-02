@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HK KITCHEN - Admin Panel</title>
+    <style>
+        * { box-sizing: border-box; font-family: sans-serif; }
+        body { background: #f0f2f5; padding: 15px; margin: 0; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        h2 { margin-top: 0; color: #d32f2f; }
+        input, select, button { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; }
+        button { background: #d32f2f; color: white; border: none; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .item-list { display: flex; flex-direction: column; gap: 10px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd; }
+        .btn-toggle { background: #ffa000; width: auto; padding: 6px 10px; font-size: 12px; }
+        .btn-delete { background: #c62828; width: auto; padding: 6px 10px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <h2>👨‍🍳 HK KITCHEN एडमिन पैनल</h2>
+
+    <div class="card">
+        <h3>नया सामान जोड़ें</h3>
+        <input type="text" id="name" placeholder="सामान का नाम (उदा: चिकन रोल)">
+        <input type="number" id="price" placeholder="कीमत">
+        <input type="text" id="image" placeholder="फोटो का लिंक (Image URL)">
+        <input type="text" id="desc" placeholder="छोटा विवरण (उदा: लच्छा पराठा और चिकन)">
+        <button onclick="addItem()">सामान वेबसाइट पर जोड़ें</button>
+    </div>
+
+    <div class="card">
+        <h3>मौजूदा सामान (Menu Items)</h3>
+        <div id="items-container" class="item-list">लोड हो रहा है...</div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCKBEH0DI5yUrnB0DINS6VpB9Q9nVjlUcE",
+            authDomain: "hk-kitchen.firebaseapp.com",
+            projectId: "hk-kitchen",
+            storageBucket: "hk-kitchen.firebasestorage.app",
+            messagingSenderId: "957964272552",
+            appId: "1:957964272552:web:c01ac54a451aae3ae4939d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.addItem = async function() {
+            const name = document.getElementById('name').value;
+            const price = Number(document.getElementById('price').value);
+            const image = document.getElementById('image').value || 'https://via.placeholder.com/150';
+            const desc = document.getElementById('desc').value;
+
+            if(!name || !price) return alert("नाम और कीमत डालना ज़रूरी है!");
+
+            await addDoc(collection(db, "menu"), {
+                name, price, image, desc, inStock: true
+            });
+
+            document.getElementById('name').value = '';
+            document.getElementById('price').value = '';
+            document.getElementById('image').value = '';
+            document.getElementById('desc').value = '';
+            alert("सामान जुड़ गया!");
+        }
+
+        onSnapshot(collection(db, "menu"), (snapshot) => {
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+            snapshot.forEach((docSnap) => {
+                const item = docSnap.data();
+                const id = docSnap.id;
+                container.innerHTML += `
+                    <div class="item-row">
+                        <div>
+                            <strong>${item.name}</strong><br>
+                            <small>${item.inStock ? '🟢 In Stock' : '🔴 Out of Stock'}</small>
+                        </div>
+                        <div style="display:flex; gap:5px;">
+                            <button class="btn-toggle" onclick="toggleStock('${id}', ${item.inStock})">
+                                ${item.inStock ? 'Out of Stock करें' : 'In Stock करें'}
+                            </button>
+                            <button class="btn-delete" onclick="deleteItem('${id}')">हटाएँ</button>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        window.toggleStock = async function(id, currentStatus) {
+            await updateDoc(doc(db, "menu", id), { inStock: !currentStatus });
+        }
+
+        window.deleteItem = async function(id) {
+            if(confirm("क्या आप इसे हटाना चाहते हैं?")) {
+                await deleteDoc(doc(db, "menu", id));
+            }
+        }
+    </script>
+</body>
+</html>
