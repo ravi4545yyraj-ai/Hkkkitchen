@@ -3,104 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HK KITCHEN - Admin Panel</title>
-    <style>
-        * { box-sizing: border-box; font-family: sans-serif; }
-        body { background: #f0f2f5; padding: 15px; margin: 0; }
-        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        h2 { margin-top: 0; color: #d32f2f; }
-        input, select, button { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; }
-        button { background: #d32f2f; color: white; border: none; font-weight: bold; font-size: 16px; cursor: pointer; }
-        .item-list { display: flex; flex-direction: column; gap: 10px; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ddd; }
-        .btn-toggle { background: #ffa000; width: auto; padding: 6px 10px; font-size: 12px; }
-        .btn-delete { background: #c62828; width: auto; padding: 6px 10px; font-size: 12px; }
-    </style>
+    <title>HK Kitchen - Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen">
 
-    <h2>👨‍🍳 HK KITCHEN एडमिन पैनल</h2>
+    <!-- Top Bar -->
+    <header class="bg-gray-900 text-white p-4 flex justify-between items-center shadow">
+        <h1 class="font-bold text-lg"><i class="fa-solid fa-gauge mr-2"></i> Admin Dashboard</h1>
+        <a href="index.html" class="text-xs bg-gray-800 px-3 py-1 rounded text-gray-300">साइट देखें</a>
+    </header>
 
-    <div class="card">
-        <h3>नया सामान जोड़ें</h3>
-        <input type="text" id="name" placeholder="सामान का नाम (उदा: चिकन रोल)">
-        <input type="number" id="price" placeholder="कीमत">
-        <input type="text" id="image" placeholder="फोटो का लिंक (Image URL)">
-        <input type="text" id="desc" placeholder="छोटा विवरण (उदा: लच्छा पराठा और चिकन)">
-        <button onclick="addItem()">सामान वेबसाइट पर जोड़ें</button>
+    <div class="max-w-md mx-auto p-4 space-y-4">
+        <!-- Add Product Box -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+            <h3 class="font-bold text-gray-800 mb-3 text-sm border-b pb-2"><i class="fa-solid fa-plus-circle text-red-600 mr-1"></i> नया सामान जोड़ें</h3>
+            
+            <div class="space-y-3">
+                <input type="text" id="p-name" placeholder="सामान का नाम (उदा: चिकन रोल)" class="w-full p-2.5 text-sm border rounded-lg bg-gray-50">
+                <input type="number" id="p-price" placeholder="कीमत (₹)" class="w-full p-2.5 text-sm border rounded-lg bg-gray-50">
+                
+                <!-- Direct File Upload (Gallery Picker) -->
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">गैलरी से फोटो चुनें:</label>
+                    <input type="file" id="p-image-file" accept="image/*" class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100">
+                </div>
+
+                <input type="text" id="p-desc" placeholder="छोटा विवरण (उदा: लच्छा पराठा और चिकन)" class="w-full p-2.5 text-sm border rounded-lg bg-gray-50">
+                
+                <button onclick="addProduct()" id="save-btn" class="w-full bg-red-600 text-white py-2.5 rounded-lg font-bold text-sm shadow hover:bg-red-700">
+                    सामान वेबसाइट पर जोड़ें
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div class="card">
-        <h3>मौजूदा सामान (Menu Items)</h3>
-        <div id="items-container" class="item-list">लोड हो रहा है...</div>
-    </div>
-
-    <!-- Firebase SDKs -->
+    <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyCKBEH0DI5yUrnB0DINS6VpB9Q9nVjlUcE",
-            authDomain: "hk-kitchen.firebaseapp.com",
-            projectId: "hk-kitchen",
-            storageBucket: "hk-kitchen.firebasestorage.app",
-            messagingSenderId: "957964272552",
-            appId: "1:957964272552:web:c01ac54a451aae3ae4939d"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.addItem = async function() {
-            const name = document.getElementById('name').value;
-            const price = Number(document.getElementById('price').value);
-            const image = document.getElementById('image').value || 'https://via.placeholder.com/150';
-            const desc = document.getElementById('desc').value;
+        // Convert uploaded image to Base64 so it directly saves without external link hassle
+        window.addProduct = async function() {
+            const name = document.getElementById('p-name').value;
+            const price = document.getElementById('p-price').value;
+            const desc = document.getElementById('p-desc').value;
+            const fileInput = document.getElementById('p-image-file');
+            const btn = document.getElementById('save-btn');
 
-            if(!name || !price) return alert("नाम और कीमत डालना ज़रूरी है!");
+            if(!name || !price) {
+                alert("कृपया नाम और कीमत भरें!");
+                return;
+            }
 
-            await addDoc(collection(db, "menu"), {
-                name, price, image, desc, inStock: true
-            });
+            btn.innerText = "अपलोड हो रहा है...";
+            btn.disabled = true;
 
-            document.getElementById('name').value = '';
-            document.getElementById('price').value = '';
-            document.getElementById('image').value = '';
-            document.getElementById('desc').value = '';
-            alert("सामान जुड़ गया!");
+            let imageUrl = "";
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    imageUrl = e.target.result; // Base64 image string
+                    await saveToFirestore(name, price, desc, imageUrl, btn);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                await saveToFirestore(name, price, desc, "", btn);
+            }
         }
 
-        onSnapshot(collection(db, "menu"), (snapshot) => {
-            const container = document.getElementById('items-container');
-            container.innerHTML = '';
-            snapshot.forEach((docSnap) => {
-                const item = docSnap.data();
-                const id = docSnap.id;
-                container.innerHTML += `
-                    <div class="item-row">
-                        <div>
-                            <strong>${item.name}</strong><br>
-                            <small>${item.inStock ? '🟢 In Stock' : '🔴 Out of Stock'}</small>
-                        </div>
-                        <div style="display:flex; gap:5px;">
-                            <button class="btn-toggle" onclick="toggleStock('${id}', ${item.inStock})">
-                                ${item.inStock ? 'Out of Stock करें' : 'In Stock करें'}
-                            </button>
-                            <button class="btn-delete" onclick="deleteItem('${id}')">हटाएँ</button>
-                        </div>
-                    </div>
-                `;
-            });
-        });
-
-        window.toggleStock = async function(id, currentStatus) {
-            await updateDoc(doc(db, "menu", id), { inStock: !currentStatus });
-        }
-
-        window.deleteItem = async function(id) {
-            if(confirm("क्या आप इसे हटाना चाहते हैं?")) {
-                await deleteDoc(doc(db, "menu", id));
+        async function saveToFirestore(name, price, desc, image, btn) {
+            try {
+                await addDoc(collection(db, "products"), {
+                    name: name,
+                    price: Number(price),
+                    desc: desc,
+                    image: image,
+                    createdAt: new Date()
+                });
+                alert("सामान सफलतापूर्वक जुड़ गया!");
+                window.location.reload();
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                alert("त्रुटि हुई: " + e.message);
+                btn.innerText = "सामान वेबसाइट पर जोड़ें";
+                btn.disabled = false;
             }
         }
     </script>
