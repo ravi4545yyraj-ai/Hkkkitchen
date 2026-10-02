@@ -3,89 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HK KITCHEN</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f4f4f4; padding-bottom: 90px; }
-        .header { background: #d32f2f; color: white; padding: 12px; text-align: center; font-size: 20px; font-weight: bold; }
-        .container { padding: 10px; max-width: 800px; margin: 0 auto; }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card { background: white; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
-        .card img { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; }
-        .title { font-weight: bold; font-size: 14px; margin-top: 5px; }
-        .desc { font-size: 11px; color: #666; margin: 3px 0; }
-        .add-btn { background: #d32f2f; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; width: 100%; margin-top: 5px; cursor: pointer; }
-        .add-btn:disabled { background: #ccc; }
-
-        .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #212121; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
-        .checkout-btn { background: #25D366; color: white; border: none; padding: 10px 15px; font-weight: bold; border-radius: 6px; cursor: pointer; }
-    </style>
+    <title>HK Kitchen - Online Menu</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-gray-50 min-h-screen pb-24">
 
-    <div class="header">HK KITCHEN</div>
+    <!-- Header -->
+    <header class="bg-red-600 text-white p-4 shadow-md sticky top-0 z-50 flex justify-between items-center">
+        <h1 class="text-xl font-bold"><i class="fa-solid fa-utensils mr-2"></i> HK KITCHEN</h1>
+        <a href="admin.html" class="text-xs bg-red-700 px-3 py-1.5 rounded-full font-medium hover:bg-red-800"><i class="fa-solid fa-lock mr-1"></i> एडमिन लॉगिन</a>
+    </header>
 
-    <div class="container">
-        <div class="grid" id="menu-grid">
-            <p>मेन्यू लोड हो रहा है...</p>
+    <!-- Banner / Store Info -->
+    <div class="bg-white p-4 shadow-sm mb-4">
+        <h2 class="text-lg font-bold text-gray-800">Welcome to HK Kitchen 🍲</h2>
+        <p class="text-sm text-gray-500">घर का जैसा स्वादिष्ट खाना, सीधे आपके दरवाजे पर!</p>
+    </div>
+
+    <!-- Menu Section -->
+    <div class="max-w-md mx-auto px-4">
+        <h3 class="font-bold text-gray-700 mb-3 text-lg"><i class="fa-solid fa-burger mr-2 text-red-500"></i>Our Menu</h3>
+        <div id="menu-list" class="space-y-3">
+            <!-- Dynamic Items will load here -->
+            <p class="text-center text-gray-400 py-10">मेन्यू लोड हो रहा है...</p>
         </div>
     </div>
 
-    <div class="cart-bar">
-        <div>कुल आइटम: <span id="total-count">0</span></div>
-        <button class="checkout-btn" onclick="sendWhatsApp()">WhatsApp पर ऑर्डर भेजें ➔</button>
+    <!-- Floating Footer Cart / WhatsApp Order -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 shadow-lg flex justify-between items-center max-w-md mx-auto z-50">
+        <div>
+            <span class="text-xs text-gray-500 block">कुल आइटम चुने गए:</span>
+            <span id="cart-count" class="font-bold text-gray-800">0</span>
+        </div>
+        <button onclick="sendWhatsAppOrder()" class="bg-green-600 text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow hover:bg-green-700 flex items-center">
+            <i class="fa-brands fa-whatsapp text-lg mr-2"></i> WhatsApp पर ऑर्डर भेजें
+        </button>
     </div>
 
+    <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Firebase Config (Tera purana config yahan hai)
         const firebaseConfig = {
-            apiKey: "AIzaSyCKBEH0DI5yUrnB0DINS6VpB9Q9nVjlUcE",
-            authDomain: "hk-kitchen.firebaseapp.com",
-            projectId: "hk-kitchen",
-            storageBucket: "hk-kitchen.firebasestorage.app",
-            messagingSenderId: "957964272552",
-            appId: "1:957964272552:web:c01ac54a451aae3ae4939d"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let cart = [];
+        let cart = {};
 
-        onSnapshot(collection(db, "menu"), (snapshot) => {
-            const grid = document.getElementById('menu-grid');
-            grid.innerHTML = '';
-            snapshot.forEach((doc) => {
-                const item = doc.data();
-                grid.innerHTML += `
-                    <div class="card">
-                        <img src="${item.image}">
-                        <div>
-                            <div class="title">${item.name}</div>
-                            <div class="desc">${item.desc || ''}</div>
+        async function loadMenu() {
+            const menuContainer = document.getElementById('menu-list');
+            menuContainer.innerHTML = '';
+            try {
+                const querySnapshot = await getDocs(collection(db, "products"));
+                if(querySnapshot.empty) {
+                    menuContainer.innerHTML = '<p class="text-center text-gray-400 py-10">अभी कोई आइटम उपलब्ध नहीं है।</p>';
+                    return;
+                }
+                querySnapshot.forEach((doc) => {
+                    const item = doc.data();
+                    const itemCard = `
+                        <div class="bg-white p-3 rounded-xl shadow-xs border border-gray-100 flex items-center gap-3">
+                            <img src="${item.image || 'https://via.placeholder.com/80'}" class="w-20 h-20 object-cover rounded-lg bg-gray-100">
+                            <div class="flex-1">
+                                <h4 class="font-bold text-gray-800 text-sm">${item.name}</h4>
+                                <p class="text-xs text-gray-500 mb-1">${item.desc || ''}</p>
+                                <span class="font-bold text-red-600 text-sm">₹${item.price}</span>
+                            </div>
+                            <button onclick="addToCart('${item.name}', ${item.price})" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg font-bold text-xs border border-red-200 active:bg-red-100">
+                                जोड़ें +
+                            </button>
                         </div>
-                        <button class="add-btn" ${!item.inStock ? 'disabled' : ''} onclick="addToCart('${item.name}')">
-                            ${item.inStock ? '+ जोड़ें' : 'Out of Stock'}
-                        </button>
-                    </div>
-                `;
-            });
-        });
-
-        window.addToCart = function(name) {
-            cart.push(name);
-            document.getElementById('total-count').innerText = cart.length;
+                    `;
+                    menuContainer.innerHTML += itemCard;
+                });
+            } catch (error) {
+                console.error("Error loading menu:", error);
+            }
         }
 
-        window.sendWhatsApp = function() {
-            if(cart.length === 0) return alert("कार्ट खाली है!");
-            let msg = "*HK KITCHEN ऑर्डर*\n---\n";
-            cart.forEach(i => msg += `• ${i}\n`);
-            window.open(`https://wa.me/910000000000?text=${encodeURIComponent(msg)}`);
+        window.addToCart = function(name, price) {
+            if(!cart[name]) cart[name] = { price: price, qty: 0 };
+            cart[name].qty += 1;
+            updateCartCount();
         }
+
+        function updateCartCount() {
+            let total = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cart-count').innerText = total;
+        }
+
+        window.sendWhatsAppOrder = function() {
+            let msg = "Hello HK Kitchen, mujhe yeh order bhejna hai:\n\n";
+            let totalAmount = 0;
+            for(let [name, data] of Object.entries(cart)) {
+                if(data.qty > 0) {
+                    msg += `- ${name} x ${data.qty} = ₹${data.price * data.qty}\n`;
+                    totalAmount += data.price * data.qty;
+                }
+            }
+            if(totalAmount === 0) {
+                alert("कृपया पहले कम से कम एक आइटम चुनें!");
+                return;
+            }
+            msg += `\n*Total Amount: ₹${totalAmount}*`;
+            let phone = "919876543210"; // Apna WhatsApp Number yahan daal lena
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        loadMenu();
     </script>
 </body>
 </html>
