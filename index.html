@@ -3,209 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HK Kitchen - ऑनलाइन ऑर्डर</title>
+    <title>HK KITCHEN</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f8f9fa; padding-bottom: 80px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f4f4f4; padding-bottom: 90px; }
+        .header { background: #d32f2f; color: white; padding: 12px; text-align: center; font-size: 20px; font-weight: bold; }
+        .container { padding: 10px; max-width: 800px; margin: 0 auto; }
         
-        /* ऊपर चलती हुई ऑफ़र पट्टी */
-        .announcement { background: #111; color: #ffeb3b; padding: 8px; font-weight: bold; font-size: 14px; text-align: center; overflow: hidden; white-space: nowrap; }
-        .announcement marquee { vertical-align: middle; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card { background: white; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
+        .card img { width: 100%; height: 110px; object-fit: cover; border-radius: 8px; }
+        .title { font-weight: bold; font-size: 14px; margin-top: 5px; }
+        .desc { font-size: 11px; color: #666; margin: 3px 0; }
+        .add-btn { background: #d32f2f; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; width: 100%; margin-top: 5px; cursor: pointer; }
+        .add-btn:disabled { background: #ccc; }
 
-        /* हेडर और बैनर */
-        .header { background: #d32f2f; color: white; padding: 15px; text-align: center; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-        .header h1 { font-size: 26px; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .header .logo { background: white; color: #d32f2f; padding: 4px 10px; border-radius: 50%; font-weight: 900; font-size: 18px; }
-        .banner { width: 100%; max-height: 160px; object-fit: cover; display: block; border-bottom: 3px solid #b71c1c; }
-
-        .container { max-width: 600px; margin: 15px auto; padding: 0 10px; }
-        .section-title { font-size: 20px; margin: 15px 0 10px 5px; color: #333; border-left: 4px solid #d32f2f; padding-left: 8px; }
-
-        /* प्रोडक्ट कार्ड */
-        .card { background: white; border-radius: 12px; margin-bottom: 15px; padding: 12px; display: flex; gap: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.06); position: relative; }
-        .badge { position: absolute; top: 10px; left: 10px; background: #388e3c; color: white; font-size: 11px; padding: 3px 7px; border-radius: 4px; font-weight: bold; z-index: 2; }
-        .card img { width: 100px; height: 100px; border-radius: 8px; object-fit: cover; }
-        .details { flex: 1; }
-        .title { font-size: 17px; font-weight: bold; color: #222; }
-        .desc { font-size: 12px; color: #666; margin: 4px 0; }
-        .price { font-size: 16px; color: #d32f2f; font-weight: bold; margin: 6px 0; }
-
-        /* ऑप्शन्स (हाफ/फुल, तीखा) */
-        .options { display: flex; gap: 8px; margin: 8px 0; }
-        select { padding: 5px; border-radius: 6px; border: 1px solid #ccc; font-size: 12px; background: #fff; }
-
-        .add-btn { background: #d32f2f; color: white; border: none; padding: 8px 14px; font-weight: bold; border-radius: 6px; cursor: pointer; float: right; margin-top: 5px; }
-
-        /* बॉटम कार्ट पट्टी */
-        .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #212121; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -3px 10px rgba(0,0,0,0.2); z-index: 100; }
-        .checkout-btn { background: #25D366; color: white; border: none; padding: 10px 18px; font-weight: bold; font-size: 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-
-        /* पॉप-अप मोडेल (चेकआउट और क्रॉस सेलिंग) */
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; justify-content: center; align-items: flex-end; }
-        .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 16px 16px 0 0; padding: 20px; max-height: 80vh; overflow-y: auto; }
-        .cross-sell { background: #fff8e1; border: 1px dashed #ffa000; padding: 10px; border-radius: 8px; margin: 15px 0; }
-        .cross-item { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-        .close-btn { background: #888; color: white; border: none; padding: 8px; border-radius: 6px; width: 100%; margin-top: 10px; font-weight: bold; }
+        .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #212121; color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
+        .checkout-btn { background: #25D366; color: white; border: none; padding: 10px 15px; font-weight: bold; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- 1. बहती ऑफ़र पट्टी -->
-    <div class="announcement">
-        <marquee>🔥 आज का स्पेशल ऑफ़र: हांडी चिकन और रोल पर पाएँ 5% की ख़ास छूट! गरमा-गरम फ़्री होम डिलीवरी! 🔥</marquee>
-    </div>
-
-    <!-- 2. हेडर व बैनर -->
-    <div class="header">
-        <h1><span class="logo">HK</span> HK KITCHEN</h1>
-    </div>
-    <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600" class="banner" alt="HK Kitchen Banner">
+    <div class="header">HK KITCHEN</div>
 
     <div class="container">
-        <div class="section-title">स्पेशल फ़ास्ट फ़ूड & मेन्यू</div>
-
-        <!-- आइटम 1: चिकन रोल -->
-        <div class="card">
-            <span class="badge">5% OFF</span>
-            <img src="https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=200" alt="चिकन रोल">
-            <div class="details">
-                <div class="title">चिकन रोल</div>
-                <div class="desc">ताज़ा लच्छा पराठा और जूसी चिकन स्टफिंग</div>
-                <div class="price">₹80</div>
-                
-                <div class="options">
-                    <select id="spice-roll">
-                        <option value="नॉर्मल तीखा">नॉर्मल तीखा</option>
-                        <option value="कम तीखा">कम तीखा</option>
-                        <option value="ज़्यादा तीखा">ज़्यादा तीखा</option>
-                    </select>
-                </div>
-                <button class="add-btn" onclick="addToCart('चिकन रोल', 80, 'spice-roll')">+ जोड़ें</button>
-            </div>
+        <div class="grid" id="menu-grid">
+            <p>मेन्यू लोड हो रहा है...</p>
         </div>
-
-        <!-- आइटम 2: हांडी चिकन -->
-        <div class="card">
-            <span class="badge">BESTSELLER</span>
-            <img src="https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=200" alt="हांडी चिकन">
-            <div class="details">
-                <div class="title">हांडी चिकन</div>
-                <div class="desc">मिट्टी की हांडी में धीमी आँच पर पका ताज़ा चिकन</div>
-                
-                <div class="options">
-                    <select id="size-handi" onchange="updateHandiPrice(this)">
-                        <option value="हाफ़ (2 पीस)-140">हाफ़ (2 पीस) - ₹140</option>
-                        <option value="फ़ुल (4 पीस)-260">फ़ुल (4 पीस) - ₹260</option>
-                    </select>
-                </div>
-                <button class="add-btn" onclick="addHandiToCart()">+ जोड़ें</button>
-            </div>
-        </div>
-
-        <!-- आइटम 3: पनीर चाउमीन -->
-        <div class="card">
-            <img src="https://images.unsplash.com/photo-1585032226651-759b368d7246?w=200" alt="पनीर चाउमीन">
-            <div class="details">
-                <div class="title">पनीर चाउमीन</div>
-                <div class="desc">ताज़ी सब्ज़ियों और पनीर क्यूब्स के साथ स्पाइसी चाउमीन</div>
-                <div class="price">₹70</div>
-                <button class="add-btn" onclick="addToCart('पनीर चाउमीन', 70)">+ जोड़ें</button>
-            </div>
-        </div>
-
     </div>
 
-    <!-- बॉटम कार्ट बार -->
     <div class="cart-bar">
-        <div>
-            <div style="font-size:12px; color:#aaa;">कुल बिल</div>
-            <div style="font-size:18px; font-weight:bold;">₹<span id="total-price">0</span></div>
-        </div>
-        <button class="checkout-btn" onclick="openCheckout()">ऑर्डर आगे बढ़ाएँ ➔</button>
+        <div>कुल आइटम: <span id="total-count">0</span></div>
+        <button class="checkout-btn" onclick="sendWhatsApp()">WhatsApp पर ऑर्डर भेजें ➔</button>
     </div>
 
-    <!-- 3. क्रॉस-सेलिंग और फाइनल चेकआउट मोडेल -->
-    <div class="modal" id="checkout-modal">
-        <div class="modal-content">
-            <h3>आपका ऑर्डर लिस्ट</h3>
-            <div id="cart-items-list" style="margin: 10px 0; border-bottom: 1px solid #eee; padding-bottom: 10px;"></div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-            <!-- क्रॉस सेलिंग बॉक्स -->
-            <div class="cross-sell">
-                <div style="font-weight:bold; color:#b71c1c; font-size:13px;">💡 इसके साथ यह भी मँगवाएँ (स्पेशल नाश्ता):</div>
-                <div class="cross-item">
-                    <span>गरमा-गरम समोसा (2 पीस) - ₹20</span>
-                    <button class="add-btn" style="padding:4px 8px; font-size:12px;" onclick="addToCart('समोसा (2 पीस)', 20)">+ जोड़ें</button>
-                </div>
-            </div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCKBEH0DI5yUrnB0DINS6VpB9Q9nVjlUcE",
+            authDomain: "hk-kitchen.firebaseapp.com",
+            projectId: "hk-kitchen",
+            storageBucket: "hk-kitchen.firebasestorage.app",
+            messagingSenderId: "957964272552",
+            appId: "1:957964272552:web:c01ac54a451aae3ae4939d"
+        };
 
-            <!-- फाइनल व्हाट्सएप बटन -->
-            <button class="checkout-btn" style="width:100%; justify-content:center; background:#25D366; margin-top:10px; padding:12px;" onclick="sendToWhatsApp()">
-                WhatsApp पर ऑर्डर भेजें
-            </button>
-            <button class="close-btn" onclick="closeCheckout()">बंद करें</button>
-        </div>
-    </div>
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    <script>
         let cart = [];
-        let total = 0;
-        // यहाँ अपना WhatsApp नंबर बदलें (10 अंक)
-        let whatsappNumber = "910000000000"; 
 
-        function addToCart(name, price, spiceId = null) {
-            let spice = spiceId ? " (" + document.getElementById(spiceId).value + ")" : "";
-            cart.push({ name: name + spice, price: price });
-            total += price;
-            updateCartUI();
-            alert(name + " कार्ट में जुड़ गया!");
-        }
-
-        function addHandiToCart() {
-            let val = document.getElementById('size-handi').value.split('-');
-            let name = "हांडी चिकन " + val[0];
-            let price = parseInt(val[1]);
-            cart.push({ name: name, price: price });
-            total += price;
-            updateCartUI();
-            alert(name + " कार्ट में जुड़ गया!");
-        }
-
-        function updateCartUI() {
-            document.getElementById('total-price').innerText = total;
-        }
-
-        function openCheckout() {
-            if(cart.length === 0) {
-                alert("कार्ट खाली है! पहले मेन्यू से सामान चुनिए।");
-                return;
-            }
-            let listHTML = "";
-            cart.forEach((item, index) => {
-                listHTML += `<div style="display:flex; justify-content:space-between; margin:5px 0;">
-                    <span>${index+1}. ${item.name}</span>
-                    <b>₹${item.price}</b>
-                </div>`;
+        onSnapshot(collection(db, "menu"), (snapshot) => {
+            const grid = document.getElementById('menu-grid');
+            grid.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const item = doc.data();
+                grid.innerHTML += `
+                    <div class="card">
+                        <img src="${item.image}">
+                        <div>
+                            <div class="title">${item.name}</div>
+                            <div class="desc">${item.desc || ''}</div>
+                        </div>
+                        <button class="add-btn" ${!item.inStock ? 'disabled' : ''} onclick="addToCart('${item.name}')">
+                            ${item.inStock ? '+ जोड़ें' : 'Out of Stock'}
+                        </button>
+                    </div>
+                `;
             });
-            document.getElementById('cart-items-list').innerHTML = listHTML;
-            document.getElementById('checkout-modal').style.display = 'flex';
+        });
+
+        window.addToCart = function(name) {
+            cart.push(name);
+            document.getElementById('total-count').innerText = cart.length;
         }
 
-        function closeCheckout() {
-            document.getElementById('checkout-modal').style.display = 'none';
-        }
-
-        function sendToWhatsApp() {
-            let msg = "*नया ऑर्डर - HK KITCHEN*\n---------------------------\n";
-            cart.forEach(item => {
-                msg += `• ${item.name} : ₹${item.price}\n`;
-            });
-            msg += `---------------------------\n*कुल बिल: ₹${total}*\n\nकृपया ऑर्डर कन्फ़र्म करके डिलीवरी टाइम बताएँ!`;
-            
-            let url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
+        window.sendWhatsApp = function() {
+            if(cart.length === 0) return alert("कार्ट खाली है!");
+            let msg = "*HK KITCHEN ऑर्डर*\n---\n";
+            cart.forEach(i => msg += `• ${i}\n`);
+            window.open(`https://wa.me/910000000000?text=${encodeURIComponent(msg)}`);
         }
     </script>
 </body>
-      </html>
-      
+</html>
